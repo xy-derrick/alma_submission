@@ -1,0 +1,705 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Passport + G-28 Extractor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Space+Grotesk:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f3efe7;
+        --ink: #1e252c;
+        --muted: #54616a;
+        --panel: #ffffff;
+        --accent: #f08a5d;
+        --accent-2: #3a506b;
+        --accent-3: #9aa6b2;
+        --border: #e4dcd3;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Space Grotesk", "Trebuchet MS", sans-serif;
+        color: var(--ink);
+        background: radial-gradient(circle at 20% 20%, #ffe9d6 0%, transparent 45%),
+          radial-gradient(circle at 90% 10%, #d9e8f5 0%, transparent 40%),
+          linear-gradient(180deg, var(--bg) 0%, #f9f6f2 100%);
+        min-height: 100vh;
+      }
+
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      header {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-bottom: 24px;
+      }
+
+      header h1 {
+        font-family: "Fraunces", "Times New Roman", serif;
+        font-size: 32px;
+        margin: 0;
+      }
+
+      header p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 640px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) 1fr;
+        gap: 24px;
+      }
+
+      .card {
+        background: var(--panel);
+        border-radius: 18px;
+        padding: 20px;
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 35px rgba(31, 42, 51, 0.08);
+        animation: rise 0.5s ease both;
+      }
+
+      .card:nth-child(2) {
+        animation-delay: 0.08s;
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .card h2 {
+        margin: 0 0 12px;
+        font-size: 20px;
+      }
+
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: var(--muted);
+      }
+
+      input[type="file"],
+      input[type="text"],
+      input[type="date"] {
+        width: 100%;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+        background: #fcfbfa;
+      }
+
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 18px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .primary {
+        background: var(--accent);
+        color: white;
+      }
+
+      .secondary {
+        background: var(--accent-2);
+        color: white;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .status {
+        font-size: 13px;
+        color: var(--muted);
+        min-height: 20px;
+      }
+
+      .review-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .meta-box {
+        background: #f8f3ee;
+        border-radius: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+      }
+
+      .group {
+        margin-bottom: 18px;
+      }
+
+      .group-title {
+        font-size: 15px;
+        margin-bottom: 10px;
+        color: var(--accent-2);
+        font-weight: 600;
+      }
+
+      .section-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 12px;
+      }
+
+      .section-title::before {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        background: var(--accent);
+      }
+
+      .section-title.g28::before {
+        background: var(--accent-2);
+      }
+
+      .field-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .field-row.missing input {
+        border-color: #f4a261;
+        background: #fff7ec;
+      }
+
+      .meta {
+        font-size: 12px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+
+      .missing-list {
+        font-size: 13px;
+        color: var(--muted);
+        white-space: pre-line;
+      }
+
+      .review-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+
+      .review-panel {
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        padding: 14px;
+        background: #fcfaf7;
+      }
+
+      .review-panel.g28 {
+        background: #f7f9fb;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(19, 24, 28, 0.55);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        padding: 20px;
+      }
+
+      .modal.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .modal-card {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid var(--border);
+        padding: 18px;
+        max-width: 520px;
+        width: 100%;
+        box-shadow: 0 20px 40px rgba(31, 42, 51, 0.2);
+      }
+
+      .modal-card h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .modal-card p {
+        margin: 0 0 12px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .issue-list {
+        margin: 0 0 12px;
+        padding-left: 18px;
+        color: var(--ink);
+        font-size: 14px;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .field-row {
+          grid-template-columns: 1fr;
+        }
+        .review-meta,
+        .review-split {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <h1>Passport + G-28 Extractor</h1>
+        <p>Upload a passport and G-28 form, review the extracted fields, and populate the test form with Playwright.</p>
+      </header>
+      <main class="grid">
+        <section class="card">
+          <h2>Upload & Extract</h2>
+          <div class="stack">
+            <div>
+              <label for="passport">Passport (PDF/JPG/PNG)</label>
+              <input id="passport" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            <div>
+              <label for="g28">G-28 (PDF/JPG/PNG)</label>
+              <input id="g28" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            <button id="extractBtn" class="primary">Extract</button>
+            <button id="validateBtn" class="secondary" disabled>Validate</button>
+            <button id="populateBtn" class="secondary" disabled>Populate Form</button>
+            <div id="status" class="status"></div>
+          </div>
+        </section>
+        <section class="card">
+          <h2>Review</h2>
+          <div class="review-meta">
+            <div class="meta-box">
+              <div class="group-title">Missing fields</div>
+              <div class="missing-list" id="missingPassport">Passport: waiting for extraction.</div>
+              <div class="missing-list" id="missingG28">G-28: waiting for extraction.</div>
+            </div>
+            <div class="meta-box">
+              <div class="group-title">Gemini summary</div>
+              <div id="summary" class="missing-list">No summary yet.</div>
+            </div>
+          </div>
+          <div class="review-split">
+            <div class="review-panel">
+              <div class="section-title passport">Passport</div>
+              <div id="passportFields"></div>
+            </div>
+            <div class="review-panel g28">
+              <div class="section-title g28">G-28</div>
+              <div id="g28Fields"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div id="validationModal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="modal-card">
+        <h3>Validation issues</h3>
+        <p>Gemini found potential issues or mismatches between the passport and G-28.</p>
+        <ul id="validationIssues" class="issue-list"></ul>
+        <div class="modal-actions">
+          <button id="closeValidation" class="secondary">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const passportInput = document.getElementById("passport");
+      const g28Input = document.getElementById("g28");
+      const extractBtn = document.getElementById("extractBtn");
+      const validateBtn = document.getElementById("validateBtn");
+      const populateBtn = document.getElementById("populateBtn");
+      const statusEl = document.getElementById("status");
+      const passportFieldsEl = document.getElementById("passportFields");
+      const g28FieldsEl = document.getElementById("g28Fields");
+      const missingPassportEl = document.getElementById("missingPassport");
+      const missingG28El = document.getElementById("missingG28");
+      const summaryEl = document.getElementById("summary");
+      const validationModal = document.getElementById("validationModal");
+      const validationIssues = document.getElementById("validationIssues");
+      const closeValidation = document.getElementById("closeValidation");
+
+      const fieldGroups = [
+        {
+          title: "Passport Holder",
+          section: "passport",
+          fields: [
+            { path: "passport.full_name", label: "Full name" },
+            { path: "passport.given_name", label: "Given name" },
+            { path: "passport.surname", label: "Surname" },
+            { path: "passport.dob", label: "Date of birth", type: "date" },
+            { path: "passport.country", label: "Country" },
+            { path: "passport.sex", label: "Sex" },
+          ],
+        },
+        {
+          title: "Passport Document",
+          section: "passport",
+          fields: [
+            { path: "passport.number", label: "Passport number" },
+            { path: "passport.issue_country", label: "Issue country" },
+            { path: "passport.expiry_date", label: "Expiry date", type: "date" },
+          ],
+        },
+        {
+          title: "G-28 Client",
+          section: "g28",
+          fields: [
+            { path: "g28.client.full_name", label: "Client full name" },
+            { path: "g28.client.given_name", label: "Client given name" },
+            { path: "g28.client.surname", label: "Client surname" },
+            { path: "g28.client.dob", label: "Client date of birth", type: "date" },
+            { path: "g28.client.country", label: "Client country" },
+            { path: "g28.client.address", label: "Client address" },
+            { path: "g28.client.city", label: "Client city" },
+            { path: "g28.client.state", label: "Client state" },
+            { path: "g28.client.zip", label: "Client ZIP" },
+            { path: "g28.client.email", label: "Client email" },
+            { path: "g28.client.phone", label: "Client phone" },
+          ],
+        },
+        {
+          title: "G-28 Attorney",
+          section: "g28",
+          fields: [
+            { path: "g28.attorney.name", label: "Attorney name" },
+            { path: "g28.attorney.firm", label: "Firm" },
+            { path: "g28.attorney.address", label: "Address" },
+            { path: "g28.attorney.city", label: "City" },
+            { path: "g28.attorney.state", label: "State" },
+            { path: "g28.attorney.zip", label: "ZIP" },
+            { path: "g28.attorney.email", label: "Email" },
+            { path: "g28.attorney.phone", label: "Phone" },
+          ],
+        },
+      ];
+
+      let extraction = null;
+
+      closeValidation.addEventListener("click", () => {
+        validationModal.classList.remove("open");
+        validationModal.setAttribute("aria-hidden", "true");
+      });
+
+      extractBtn.addEventListener("click", async () => {
+        statusEl.textContent = "";
+        const formData = new FormData();
+        if (passportInput.files[0]) {
+          formData.append("passport", passportInput.files[0]);
+        }
+        if (g28Input.files[0]) {
+          formData.append("g28", g28Input.files[0]);
+        }
+        if (![...formData.keys()].length) {
+          statusEl.textContent = "Please add at least one file.";
+          return;
+        }
+
+        extractBtn.disabled = true;
+        statusEl.textContent = "Extracting...";
+        try {
+          const response = await fetch("/extract", { method: "POST", body: formData });
+          if (!response.ok) {
+            const message = await response.text();
+            throw new Error(message || "Extraction failed.");
+          }
+          extraction = await response.json();
+          renderFields();
+          renderSummary();
+          populateBtn.disabled = false;
+          validateBtn.disabled = false;
+          statusEl.textContent = "Extraction complete. Review and edit if needed.";
+        } catch (error) {
+          statusEl.textContent = error.message;
+        } finally {
+          extractBtn.disabled = false;
+        }
+      });
+
+      validateBtn.addEventListener("click", async () => {
+        if (!extraction) return;
+        statusEl.textContent = "Validating with Gemini...";
+        validateBtn.disabled = true;
+        const payload = harvestExtractionFromDom();
+        try {
+          const response = await fetch("/validate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!response.ok) {
+            const message = await response.text();
+            throw new Error(message || "Validation failed.");
+          }
+          extraction = payload;
+          extraction.validation = await response.json();
+          renderValidation();
+          statusEl.textContent = "Validation complete.";
+        } catch (error) {
+          statusEl.textContent = error.message;
+        } finally {
+          validateBtn.disabled = false;
+        }
+      });
+
+      populateBtn.addEventListener("click", async () => {
+        if (!extraction) return;
+        statusEl.textContent = "Launching Playwright...";
+        populateBtn.disabled = true;
+        try {
+          const response = await fetch("/populate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(extraction),
+          });
+          if (!response.ok) {
+            const message = await response.text();
+            throw new Error(message || "Populate failed.");
+          }
+          const result = await response.json();
+          if (result.error) {
+            statusEl.textContent = `Populate failed: ${result.error}`;
+          } else if (result.method === "browser_use" && result.result) {
+            statusEl.textContent = `Form populated. ${result.result}`;
+          } else {
+            const count = Array.isArray(result.filled_fields) ? result.filled_fields.length : 0;
+            statusEl.textContent = `Form populated. Filled ${count} fields.`;
+          }
+        } catch (error) {
+          statusEl.textContent = error.message;
+        } finally {
+          populateBtn.disabled = false;
+        }
+      });
+
+      function renderFields() {
+        passportFieldsEl.innerHTML = "";
+        g28FieldsEl.innerHTML = "";
+        const missingPassport = [];
+        const missingG28 = [];
+        fieldGroups.forEach((group) => {
+          const groupEl = document.createElement("div");
+          groupEl.className = "group";
+
+          const title = document.createElement("div");
+          title.className = "group-title";
+          title.textContent = group.title;
+          groupEl.appendChild(title);
+
+          group.fields.forEach((field) => {
+            const row = document.createElement("div");
+            row.className = "field-row";
+
+            const label = document.createElement("label");
+            label.textContent = field.label;
+
+            const input = document.createElement("input");
+            input.type = field.type || "text";
+            input.value = getValue(field.path) || "";
+            input.dataset.path = field.path;
+            input.addEventListener("input", (event) => {
+              setValue(field.path, event.target.value);
+              if (event.target.value) {
+                row.classList.remove("missing");
+              } else {
+                row.classList.add("missing");
+              }
+              updateMissing();
+            });
+
+            if (!input.value) {
+              row.classList.add("missing");
+              if (field.path.startsWith("g28.")) {
+                missingG28.push(field.path);
+              } else {
+                missingPassport.push(field.path);
+              }
+            }
+
+            const inputWrap = document.createElement("div");
+            inputWrap.appendChild(input);
+
+            const meta = document.createElement("div");
+            meta.className = "meta";
+            const source = (extraction.source && extraction.source[field.path]) || "-";
+            meta.textContent = `source: ${source}`;
+            inputWrap.appendChild(meta);
+
+            row.appendChild(label);
+            row.appendChild(inputWrap);
+            groupEl.appendChild(row);
+          });
+
+          if (group.section === "g28") {
+            g28FieldsEl.appendChild(groupEl);
+          } else {
+            passportFieldsEl.appendChild(groupEl);
+          }
+        });
+
+        updateMissing(missingPassport, missingG28);
+      }
+
+      function renderSummary() {
+          if (!extraction || !extraction.summary) {
+            summaryEl.textContent = "No summary yet.";
+            return;
+          }
+          summaryEl.textContent = extraction.summary;
+        }
+
+      function renderValidation() {
+        if (!extraction || !extraction.validation) return;
+        const issues = extraction.validation.issues || [];
+        const match = extraction.validation.passport_matches_client;
+        if (!issues.length && match !== false) return;
+
+        validationIssues.innerHTML = "";
+        if (match === false) {
+          const item = document.createElement("li");
+          item.textContent = "Passport holder does not match the G-28 client.";
+          validationIssues.appendChild(item);
+        }
+        issues.forEach((issue) => {
+          const item = document.createElement("li");
+          item.textContent = issue;
+          validationIssues.appendChild(item);
+        });
+
+        validationModal.classList.add("open");
+        validationModal.setAttribute("aria-hidden", "false");
+      }
+
+      function harvestExtractionFromDom() {
+        const payload = JSON.parse(JSON.stringify(extraction || {}));
+        fieldGroups.forEach((group) => {
+          group.fields.forEach((field) => {
+            const input = document.querySelector(`input[data-path="${field.path}"]`);
+            if (!input) return;
+            setValueOn(payload, field.path, input.value);
+          });
+        });
+        return payload;
+      }
+
+      function setValueOn(target, path, value) {
+        const parts = path.split(".");
+        let current = target;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!current[parts[i]]) current[parts[i]] = {};
+          current = current[parts[i]];
+        }
+        current[parts[parts.length - 1]] = value;
+      }
+
+      function updateMissing(passportMissing, g28Missing) {
+        const missingPass = passportMissing || [];
+        const missingG = g28Missing || [];
+        if (!passportMissing && !g28Missing) {
+          fieldGroups.forEach((group) => {
+            group.fields.forEach((field) => {
+              const value = getValue(field.path);
+              if (!value) {
+                if (field.path.startsWith("g28.")) {
+                  missingG.push(field.path);
+                } else {
+                  missingPass.push(field.path);
+                }
+              }
+            });
+          });
+        }
+        extraction.missing_fields = [...missingPass, ...missingG];
+        missingPassportEl.textContent = missingPass.length
+          ? `Passport: ${missingPass.join(", ")}`
+          : "Passport: none";
+        missingG28El.textContent = missingG.length ? `G-28: ${missingG.join(", ")}` : "G-28: none";
+      }
+
+      function getValue(path) {
+        if (!extraction) return "";
+        const parts = path.split(".");
+        let current = extraction;
+        for (const part of parts) {
+          current = current ? current[part] : undefined;
+        }
+        return current || "";
+      }
+
+      function setValue(path, value) {
+        const parts = path.split(".");
+        let current = extraction;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!current[parts[i]]) current[parts[i]] = {};
+          current = current[parts[i]];
+        }
+        current[parts[parts.length - 1]] = value;
+      }
+    </script>
+  </body>
+</html>

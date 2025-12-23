@@ -1,0 +1,15 @@
+{
+  "gemini": {
+    "enabled": true,
+    "api_key": "AIzaSyA7aICMXXQupYlz6hgv1zfn4i0d14Z3g5g",
+    "model": "gemini-3-flash-preview",
+    "summary_enabled": true,
+    "structured_enabled": true,
+    "validation_enabled": true,
+    "fill_enabled": true,
+    "max_chars": 12000
+  },
+  "fill": {
+    "provider": "playwright"
+  }
+}
