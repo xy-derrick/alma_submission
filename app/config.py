@@ -11,7 +11,7 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_CONFIG: Dict[str, Any] = {
     "gemini": {
         "enabled": False,
-        "api_key": "AIzaSyA7aICMXXQupYlz6hgv1zfn4i0d14Z3g5g",
+        "api_key": "",
         "model": "gemini-2.5-flash",
         "summary_enabled": True,
         "structured_enabled": True,
