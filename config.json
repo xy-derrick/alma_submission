@@ -1,7 +1,7 @@
 {
   "gemini": {
     "enabled": true,
-    "api_key": "AIzaSyA7aICMXXQupYlz6hgv1zfn4i0d14Z3g5g",
+    "api_key": "",
     "model": "gemini-3-flash-preview",
     "summary_enabled": true,
     "structured_enabled": true,
